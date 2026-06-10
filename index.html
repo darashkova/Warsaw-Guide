@@ -25,22 +25,26 @@
 
   header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);
     backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
-  .htop{padding:22px 20px 11px}
-  .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .hrow h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.02}
-  .hrow p{font-size:13px;color:var(--mut);margin-top:4px}
-  .bell{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
-    background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
-  .bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9}
-  .bell .cnt{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;
+  .htop{padding:18px 20px 11px}
+  .hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .hrow h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.02;flex:1}
+  .hicons{display:flex;align-items:center;gap:8px;flex:none}
+  .hbtn{position:relative;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+    background:var(--card);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink);flex:none}
+  .hbtn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9}
+  .hbtn .cnt{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;
     background:var(--red);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;
     justify-content:center;padding:0 4px;opacity:0;transition:.15s}
-  .bell.has .cnt{opacity:1}
-  .search{display:flex;align-items:center;gap:10px;margin-top:13px;background:var(--soft);
+  .hbtn.has .cnt{opacity:1}
+  /* search overlay */
+  .search-wrap{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .25s ease;margin-top:0}
+  .search-wrap.open{max-height:64px;opacity:1;margin-top:10px}
+  .search{display:flex;align-items:center;gap:10px;background:var(--soft);
     border-radius:15px;padding:0 13px;height:48px}
   .search svg{width:19px;height:19px;flex:none;fill:none;stroke:var(--mut);stroke-width:1.9}
   .search input{flex:1;border:none;background:none;outline:none;font-family:inherit;font-size:15px;color:var(--ink)}
-  .filters{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+  .filters{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none;padding:0 0 2px}
   .filters::-webkit-scrollbar{display:none}
   .chip{white-space:nowrap;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;
     color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;
@@ -116,30 +120,30 @@
   .pin span{display:block;width:18px;height:18px;border-radius:50%;background:var(--pc);
     border:3px solid #fff;box-shadow:0 2px 7px rgba(20,20,25,.45);transition:transform .15s}
   .pin.active span{transform:scale(1.5);box-shadow:0 4px 13px rgba(20,20,25,.6)}
-  .leaflet-popup-content-wrapper{border-radius:16px;padding:0;overflow:hidden;box-shadow:0 16px 44px -14px rgba(20,20,25,.5)}
-  .leaflet-popup-content{margin:0;width:230px!important}
-  .pop img{width:100%;height:120px;object-fit:cover;display:block}
-  .pop-b{padding:12px 13px 13px}
-  .pop-name{font-size:16px;font-weight:800;line-height:1.18;margin-bottom:4px;color:var(--ink)}
-  .pop-rate{font-size:12.5px;color:var(--mut);margin-bottom:10px;font-weight:600}
+  .leaflet-popup-content-wrapper{border-radius:18px;padding:0;overflow:hidden;box-shadow:0 16px 44px -14px rgba(20,20,25,.5)}
+  .leaflet-popup-content{margin:0;width:260px!important}
+  .pop img{width:100%;height:140px;object-fit:cover;display:block}
+  .pop-b{padding:13px 14px 14px}
+  .pop-name{font-size:17px;font-weight:800;line-height:1.18;margin-bottom:4px;color:var(--ink)}
+  .pop-rate{font-size:12.5px;color:var(--mut);font-weight:600}
   .pop-rate .st{color:var(--gold)}
+  .pop-cat{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .pop-pick{font-size:12.5px;color:#3d3d42;margin:8px 0 10px;line-height:1.45}
+  .pop-pick b{color:var(--ink);font-weight:700}
+  .pop-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
+  .pop-badge{font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:2px 7px;background:var(--soft);font-weight:600}
   .pop a{display:block;text-align:center;font-size:13px;font-weight:700;color:#fff;background:var(--black);
     text-decoration:none;padding:9px;border-radius:11px}
 
-  /* floating dock (mobile) */
-  .dock{position:fixed;left:0;right:0;bottom:0;z-index:1100;display:flex;align-items:center;justify-content:space-between;
-    gap:12px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));pointer-events:none}
-  .dockbar{pointer-events:auto;display:flex;align-items:center;gap:4px;background:var(--black);
-    border-radius:999px;padding:6px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+  /* floating dock (mobile) — тумблер по центру */
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:1100;display:flex;align-items:center;justify-content:center;
+    padding:10px 18px calc(14px + env(safe-area-inset-bottom));pointer-events:none}
+  .dockbar{pointer-events:auto;display:flex;align-items:center;gap:2px;background:var(--black);
+    border-radius:999px;padding:5px;box-shadow:0 12px 32px -10px rgba(0,0,0,.55)}
   .dtab{display:flex;align-items:center;gap:7px;border:none;background:none;cursor:pointer;font-family:inherit;
-    color:rgba(255,255,255,.72);font-size:14px;font-weight:700;padding:10px 14px;border-radius:999px;transition:.15s}
-  .dtab svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9}
+    color:rgba(255,255,255,.65);font-size:14px;font-weight:700;padding:10px 20px;border-radius:999px;transition:.2s;white-space:nowrap}
+  .dtab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9}
   .dtab.on{background:#fff;color:var(--black)}
-  .dtab.heart.on svg{fill:var(--red);stroke:var(--red)}
-  .fab{pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:var(--black);
-    color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
-    box-shadow:0 12px 30px -8px rgba(0,0,0,.55)}
-  .fab svg{width:23px;height:23px;fill:#fff;stroke:#fff}
 
   @media(min-width:1000px){
     .dock{display:none}
@@ -149,7 +153,6 @@
     .split{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}
     .list{padding:22px 32px 60px}
     .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .featured{display:none}
     .mapcol{position:sticky;left:auto;right:auto;top:var(--head);bottom:auto;
       height:calc(100vh - var(--head));display:block}
     body.map-active .list{display:block}
@@ -163,16 +166,22 @@
 <header>
   <div class="htop">
     <div class="hrow">
-      <div><h1>Warsaw Days '26</h1></div>
-      <button class="bell" id="savedBtn" title="Сохранённые">
-        <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg>
-        <span class="cnt" id="savedCnt">0</span>
-      </button>
+      <h1>Warsaw Days '26</h1>
+      <div class="hicons">
+        <button class="hbtn" id="searchBtn" title="Поиск">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button class="hbtn" id="savedBtn" title="Сохранённые">
+          <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg>
+          <span class="cnt" id="savedCnt">0</span>
+        </button>
+      </div>
     </div>
-    <div class="search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="q" type="search" placeholder="Поиск места или района…" autocomplete="off">
-
+    <div class="search-wrap" id="searchWrap">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Поиск места или района…" autocomplete="off">
+      </div>
     </div>
     <div class="filters" id="filters"></div>
   </div>
@@ -180,7 +189,6 @@
 
 <div class="split">
   <div class="list">
-    <div class="featured" id="featured"></div>
     <div class="seclab">Все места <span class="n" id="cnt"></span></div>
     <div class="lgrid" id="lgrid"></div>
     <div class="empty" id="empty">Ничего не найдено</div>
@@ -189,15 +197,14 @@
 </div>
 
 <nav class="dock">
-  <div class="dockbar">
-    <button class="dtab on" data-f="all">
-      <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/></svg>Места</button>
-    <button class="dtab heart" data-f="saved">
-      <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg></button>
+  <div class="dockbar" id="dockbar">
+    <button class="dtab on" id="tabList">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Список</button>
+    <button class="dtab" id="tabMap">
+      <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>
+      Карта</button>
   </div>
-  <button class="fab" id="mapfab" title="Карта">
-    <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>
-  </button>
 </nav>
 
 <script>
@@ -358,17 +365,16 @@ const P=[
   badges:["Воля","Бары"],desc:"Квартал в бывшей пивоварне: рестораны, бары.",pick:"<b>Берите:</b> трюфельный бургер, пельмени с уткой.",
   long:"Бывшая пивоварня — современный квартал на Воле с фуд-холлом Warzelnia, ресторанами, барами, офисами и жильём. Приятное пространство с живой атмосферой по вечерам и хорошим выбором еды и напитков. Что брать: трюфельный бургер, пельмени с уткой, локальное пиво и коктейли. Минусы: ценник «центровой», по выходным многолюдно.",
   url:"https://maps.app.goo.gl/GA5hXEkYv6J6KQ9x9"}
-];
+]
 
-const FEATURED=[7,8,2,11,12,9];
+const fbar=document.getElementById('filters');
 const state={cat:"all",q:""};
 const saved=new Set();
 
-/* filters */
-const fbar=document.getElementById('filters');
 function chip(key,label,hex){
-  const b=document.createElement('button');b.className='chip'+(key==='all'?' on':'');
-  b.dataset.k=key;b.dataset.hex=hex||'#161616';
+  const b=document.createElement('button');
+  b.className='chip'+(key==='all'?' on':'');
+  b.dataset.k=key; b.dataset.hex=hex||'#161616';
   const n=key==='all'?P.length:P.filter(p=>p.cat===key).length;
   b.innerHTML=label+` <span class="ct">${n}</span>`;
   b.onclick=()=>{state.cat=key;syncChips();applyFilters();};
@@ -376,6 +382,7 @@ function chip(key,label,hex){
 }
 chip('all','Все','#161616');
 Object.entries(CATS).forEach(([k,c])=>chip(k,c.label,c.hex));
+
 function syncChips(){
   document.querySelectorAll('.chip').forEach(c=>{
     const on=c.dataset.k===state.cat;
@@ -384,19 +391,8 @@ function syncChips(){
     c.style.borderColor=on?c.dataset.hex:'';
   });
 }
+syncChips();
 
-/* featured */
-const featEl=document.getElementById('featured');
-FEATURED.forEach(i=>{
-  const p=P[i],c=CATS[p.cat];
-  const b=document.createElement('button');b.className='fcard';
-  b.innerHTML=`<img src="${p.img}" alt="${p.name}" onerror="this.style.opacity=0">
-    <div class="fov"></div><span class="fbadge">Must-see</span>
-    <div class="ftext"><div class="fname">${p.name}</div>
-    <div class="farea">${p.rate?`<span class="st">★</span> ${p.rate.toFixed(1)} · `:''}${p.area}</div></div>`;
-  b.onclick=()=>focusCard(i);
-  featEl.appendChild(b);
-});
 
 /* map */
 const map=L.map('map',{scrollWheelZoom:false}).setView([52.235,21.01],12);
@@ -408,10 +404,17 @@ const markers=P.map((p,i)=>{
   const m=L.marker([p.lat,p.lng],{icon:L.divIcon({className:'pin',
     html:`<span style="--pc:${c.hex}"></span>`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-9]})});
   const rt=p.rate?`<span class="st">★</span> ${p.rate.toFixed(1)} · `:'';
-  m.bindPopup(`<div class="pop"><img src="${p.img}" alt="" onerror="this.style.display='none'">
-    <div class="pop-b"><div class="pop-name">${p.name}</div>
-    <div class="pop-rate">${rt}${c.label} · ${p.area}</div>
-    <a href="${p.url}" target="_blank" rel="noopener">Маршрут в Google Maps →</a></div></div>`,{maxWidth:230});
+  const bdg=p.badges.slice(0,2).map(b=>`<span class="pop-badge">${b}</span>`).join('');
+  m.bindPopup(`<div class="pop">
+    <img src="${p.img}" alt="" onerror="this.style.display='none'">
+    <div class="pop-b">
+      <div class="pop-cat" style="color:${c.hex}">${c.label}</div>
+      <div class="pop-name">${p.name}</div>
+      <div class="pop-rate">${rt}${p.area}</div>
+      <div class="pop-pick">${p.pick}</div>
+      ${bdg?`<div class="pop-badges">${bdg}</div>`:''}
+      <a href="${p.url}" target="_blank" rel="noopener">Маршрут →</a>
+    </div></div>`,{maxWidth:260});
   m.on('click',()=>focusCard(i));
   return m;
 });
@@ -469,46 +472,64 @@ function applyFilters(){
   });
   if(b.length)map.fitBounds(b,{padding:[44,44],maxZoom:15});
   const plain=(state.cat==='all'&&!q);
-  featEl.style.display=plain?'':'none'; featLab.style.display=plain?'':'none';
+
   cntEl.textContent=n; emptyEl.style.display=n?'none':'block';
   emptyEl.textContent=(state.cat==='saved'&&!saved.size)?'Пока ничего не сохранено — жмите ♥ на карточках':'Ничего не найдено';
 }
 
 /* search */
 document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value;applyFilters();});
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  const w=document.getElementById('searchWrap');
+  const opening=!w.classList.contains('open');
+  w.classList.toggle('open');
+  if(opening)setTimeout(()=>document.getElementById('q').focus(),320);
+  else{document.getElementById('q').value='';state.q='';applyFilters();}
+  measureHead();
+});
 /* сброс через фильтр 'Все' */
 
 /* saved */
 function updateSaved(){
   const b=document.getElementById('savedBtn');b.classList.toggle('has',saved.size>0);
   document.getElementById('savedCnt').textContent=saved.size;}
-document.getElementById('savedBtn').addEventListener('click',()=>{state.cat='saved';syncChips();applyFilters();
-  if(mq()){showMap(false);} window.scrollTo({top:0,behavior:'smooth'});});
+document.getElementById('savedBtn').addEventListener('click',()=>{
+  state.cat = state.cat==='saved' ? 'all' : 'saved';
+  syncChips();applyFilters();
+  showMap(false);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
 
 /* view toggle */
 const mq=()=>window.matchMedia('(max-width:999px)').matches;
 function showMap(on){
   document.body.classList.toggle('map-active',on);
-  const fab=document.getElementById('mapfab');
-  fab.innerHTML=on?'<svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2"><path d="M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>'
-    :'<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>';
+  document.getElementById('tabList').classList.toggle('on',!on);
+  document.getElementById('tabMap').classList.toggle('on',on);
   measureHead(); if(on)setTimeout(()=>map.invalidateSize(),90);
 }
-document.getElementById('mapfab').addEventListener('click',()=>showMap(!document.body.classList.contains('map-active')));
-document.querySelectorAll('.dtab').forEach(t=>t.addEventListener('click',()=>{
-  document.querySelectorAll('.dtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-  state.cat=t.dataset.f;syncChips();applyFilters();showMap(false);window.scrollTo({top:0,behavior:'smooth'});
-}));
+document.getElementById('tabList').addEventListener('click',()=>{
+  showMap(false);
+});
+document.getElementById('tabMap').addEventListener('click',()=>{
+  showMap(true);
+});
 
 function gotoMap(i){
   if(mq())showMap(true);
   setTimeout(()=>{map.invalidateSize();map.flyTo([P[i].lat,P[i].lng],16,{duration:.7});markers[i].openPopup();},mq()?260:0);
 }
 function focusCard(i){
-  if(mq())showMap(false);
-  setTimeout(()=>{const el=cards[i];el.scrollIntoView({behavior:'smooth',block:'center'});
-    el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2px var(--black)';
-    setTimeout(()=>el.style.boxShadow='',1300);},mq()?90:0);
+  if(mq()){
+    // на мобайле остаёмся на карте — попап уже открыт через m.on('click')
+    return;
+  }
+  // десктоп — подсвечиваем карточку в списке
+  const el=cards[i];
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.style.transition='box-shadow .3s';
+  el.style.boxShadow='0 0 0 2px var(--black)';
+  setTimeout(()=>el.style.boxShadow='',1300);
 }
 
 function measureHead(){document.documentElement.style.setProperty('--head',document.querySelector('header').offsetHeight+'px');}
