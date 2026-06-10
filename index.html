@@ -413,7 +413,7 @@ const markers=P.map((p,i)=>{
       <div class="pop-rate">${rt}${p.area}</div>
       <div class="pop-pick">${p.pick}</div>
       ${bdg?`<div class="pop-badges">${bdg}</div>`:''}
-      <a href="${p.url}" target="_blank" rel="noopener">Маршрут →</a>
+      <a href="${p.url}" target="_blank" rel="noopener">📍 Google Maps</a>
     </div></div>`,{maxWidth:260});
   m.on('click',()=>focusCard(i));
   return m;
@@ -439,7 +439,7 @@ const cards=P.map((p,i)=>{
       <div class="badges">${p.badges.map(b=>`<span class="badge">${b}</span>`).join('')}</div>
       <div class="actions">
         <button class="btn btn-map">На карте</button>
-        <a class="btn btn-go" href="${p.url}" target="_blank" rel="noopener">Маршрут</a>
+        <a class="btn btn-go" href="${p.url}" target="_blank" rel="noopener">📍 Google Maps</a>
       </div></div>`;
   el.querySelector('.ph').addEventListener('click',e=>{if(e.target.closest('.heart'))return;gotoMap(i);});
   el.querySelector('.btn-map').addEventListener('click',()=>gotoMap(i));
