@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Warsaw Days '26</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+  :root{
+    --bg:#FFFFFF; --soft:#F2F2F0; --card:#FFFFFF; --ink:#16161A; --mut:#8A8A8E;
+    --line:#ECEAE5; --black:#161616; --gold:#F5B301; --red:#FF4D4F; --head:172px;
+    --c-museum:#7E6BA0; --c-park:#4E7C57; --c-shop:#C2823E;
+    --c-cafe:#9B6A45; --c-resto:#B0514A; --c-food:#3F7D86;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  svg{display:block}
+
+  header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .htop{padding:22px 20px 11px}
+  .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .hrow h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.02}
+  .hrow p{font-size:13px;color:var(--mut);margin-top:4px}
+  .bell{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
+  .bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9}
+  .bell .cnt{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;
+    background:var(--red);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;
+    justify-content:center;padding:0 4px;opacity:0;transition:.15s}
+  .bell.has .cnt{opacity:1}
+  .search{display:flex;align-items:center;gap:10px;margin-top:13px;background:var(--soft);
+    border-radius:15px;padding:0 13px;height:48px}
+  .search svg{width:19px;height:19px;flex:none;fill:none;stroke:var(--mut);stroke-width:1.9}
+  .search input{flex:1;border:none;background:none;outline:none;font-family:inherit;font-size:15px;color:var(--ink)}
+  .filters{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{white-space:nowrap;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:8px 15px;transition:.15s;min-height:38px}
+  .chip .ct{color:var(--mut);font-weight:600;font-size:12px;margin-left:3px}
+  .chip.on{color:#fff;border-color:transparent}
+  .chip.on .ct{color:rgba(255,255,255,.75)}
+
+  .split{display:block}
+  .list{padding:16px 20px calc(110px + env(safe-area-inset-bottom))}
+  .seclab{font-size:16px;font-weight:800;letter-spacing:-.01em;margin:6px 2px 13px;display:flex;align-items:baseline;gap:8px}
+  .seclab .n{font-size:12.5px;color:var(--mut);font-weight:600}
+
+  /* featured carousel */
+  .featured{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;padding:1px 2px 18px;scroll-snap-type:x mandatory}
+  .featured::-webkit-scrollbar{display:none}
+  .fcard{flex:none;width:74%;max-width:300px;aspect-ratio:5/4;border-radius:20px;overflow:hidden;position:relative;
+    border:none;cursor:pointer;scroll-snap-align:start;background:var(--line)}
+  .fcard img{width:100%;height:100%;object-fit:cover}
+  .fov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 38%,rgba(0,0,0,.62) 100%)}
+  .fbadge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);color:var(--ink);
+    font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px}
+  .ftext{position:absolute;left:14px;right:14px;bottom:13px;text-align:left;color:#fff}
+  .fname{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+  .farea{font-size:12.5px;margin-top:3px;opacity:.92;font-weight:600}
+  .farea .st{color:var(--gold)}
+
+  .lgrid{display:flex;flex-direction:column;gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 8px 26px -20px rgba(20,20,25,.55)}
+  .ph{position:relative;aspect-ratio:3/2;overflow:hidden;background:var(--line);cursor:pointer}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:.5s}
+  .ph:active img{transform:scale(1.03)}
+  .heart{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;border:none;
+    background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 4px 12px -4px rgba(0,0,0,.3);line-height:0;padding:0}
+  .heart svg{width:18px;height:18px;fill:none;stroke:#16161A;stroke-width:2;transition:.15s;flex:none}
+  .heart.on svg{fill:var(--red);stroke:var(--red)}
+  .body{padding:15px 16px 16px;display:flex;flex-direction:column;flex:1}
+  .name{font-size:18.5px;font-weight:800;letter-spacing:-.01em;line-height:1.18;margin-bottom:7px}
+  .meta{font-size:13px;color:var(--mut);font-weight:600;margin-bottom:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .meta .star{color:var(--gold);font-weight:700}
+  .meta .rt{color:var(--ink);font-weight:700}
+  .meta .dot{opacity:.45}
+  .meta .walk{color:var(--c-park);font-weight:700}
+  .desc{font-size:14px;color:#3d3d42;margin-bottom:11px}
+  .pick{font-size:13.5px;margin-bottom:12px}
+  .pick b{color:var(--ink);font-weight:700}
+  .long{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s ease}
+  .card.open .long{max-height:560px;opacity:1;margin-bottom:13px}
+  .long p{font-size:13.5px;color:#3d3d42;line-height:1.6}
+  .more{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--ink);
+    background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:13px;text-decoration:underline;text-underline-offset:3px}
+  .more .ar{transition:transform .3s;text-decoration:none;display:inline-block}
+  .card.open .more .ar{transform:rotate(180deg)}
+  .badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .badge{font-size:11.5px;color:var(--mut);border:1px solid var(--line);border-radius:8px;padding:4px 9px;background:var(--soft);font-weight:600}
+  .spacer{flex:1}
+  .actions{display:flex;gap:10px;margin-top:auto}
+  .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;
+    font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;border-radius:13px;text-decoration:none;transition:.15s}
+  .btn-map{background:var(--black);color:#fff;border:none}
+  .btn-map:active{transform:scale(.98)}
+  .btn-go{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+
+  .empty{display:none;text-align:center;color:var(--mut);font-size:14px;font-weight:600;padding:50px 20px}
+
+  /* map */
+  .mapcol{position:fixed;left:0;right:0;top:var(--head);bottom:0;display:none}
+  body.map-active .mapcol{display:block}
+  body.map-active .list{display:none}
+  #map{width:100%;height:100%;z-index:1}
+  .pin span{display:block;width:18px;height:18px;border-radius:50%;background:var(--pc);
+    border:3px solid #fff;box-shadow:0 2px 7px rgba(20,20,25,.45);transition:transform .15s}
+  .pin.active span{transform:scale(1.5);box-shadow:0 4px 13px rgba(20,20,25,.6)}
+  .leaflet-popup-content-wrapper{border-radius:16px;padding:0;overflow:hidden;box-shadow:0 16px 44px -14px rgba(20,20,25,.5)}
+  .leaflet-popup-content{margin:0;width:230px!important}
+  .pop img{width:100%;height:120px;object-fit:cover;display:block}
+  .pop-b{padding:12px 13px 13px}
+  .pop-name{font-size:16px;font-weight:800;line-height:1.18;margin-bottom:4px;color:var(--ink)}
+  .pop-rate{font-size:12.5px;color:var(--mut);margin-bottom:10px;font-weight:600}
+  .pop-rate .st{color:var(--gold)}
+  .pop a{display:block;text-align:center;font-size:13px;font-weight:700;color:#fff;background:var(--black);
+    text-decoration:none;padding:9px;border-radius:11px}
+
+  /* floating dock (mobile) */
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:1100;display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));pointer-events:none}
+  .dockbar{pointer-events:auto;display:flex;align-items:center;gap:4px;background:var(--black);
+    border-radius:999px;padding:6px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+  .dtab{display:flex;align-items:center;gap:7px;border:none;background:none;cursor:pointer;font-family:inherit;
+    color:rgba(255,255,255,.72);font-size:14px;font-weight:700;padding:10px 14px;border-radius:999px;transition:.15s}
+  .dtab svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9}
+  .dtab.on{background:#fff;color:var(--black)}
+  .dtab.heart.on svg{fill:var(--red);stroke:var(--red)}
+  .fab{pointer-events:auto;width:56px;height:56px;border-radius:50%;border:none;background:var(--black);
+    color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.55)}
+  .fab svg{width:23px;height:23px;fill:#fff;stroke:#fff}
+
+  @media(min-width:1000px){
+    .dock{display:none}
+    .htop{padding:20px 32px 12px}
+    .hrow h1{font-size:30px}
+    .search,.filters{max-width:900px}
+    .split{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}
+    .list{padding:22px 32px 60px}
+    .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .featured{display:none}
+    .mapcol{position:sticky;left:auto;right:auto;top:var(--head);bottom:auto;
+      height:calc(100vh - var(--head));display:block}
+    body.map-active .list{display:block}
+    .fcard{width:300px}
+  }
+  @media(min-width:1480px){.lgrid{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htop">
+    <div class="hrow">
+      <div><h1>Warsaw Days '26</h1></div>
+      <button class="bell" id="savedBtn" title="Сохранённые">
+        <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg>
+        <span class="cnt" id="savedCnt">0</span>
+      </button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Поиск места или района…" autocomplete="off">
+
+    </div>
+    <div class="filters" id="filters"></div>
+  </div>
+</header>
+
+<div class="split">
+  <div class="list">
+    <div class="featured" id="featured"></div>
+    <div class="seclab">Все места <span class="n" id="cnt"></span></div>
+    <div class="lgrid" id="lgrid"></div>
+    <div class="empty" id="empty">Ничего не найдено</div>
+  </div>
+  <div class="mapcol"><div id="map"></div></div>
+</div>
+
+<nav class="dock">
+  <div class="dockbar">
+    <button class="dtab on" data-f="all">
+      <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/></svg>Места</button>
+    <button class="dtab heart" data-f="saved">
+      <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg></button>
+  </div>
+  <button class="fab" id="mapfab" title="Карта">
+    <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>
+  </button>
+</nav>
+
+<script>
+const CATS={
+  museum:{label:"Музеи",hex:"#7E6BA0"}, park:{label:"Прогулки и виды",hex:"#4E7C57"},
+  shop:{label:"Магазины",hex:"#C2823E"}, cafe:{label:"Кафе",hex:"#9B6A45"},
+  resto:{label:"Рестораны",hex:"#B0514A"}, food:{label:"Фуд-корты",hex:"#3F7D86"}
+};
+const IMG="https://lh3.googleusercontent.com/place-photos/";
+const P=[
+ {cat:"museum",name:"Музей «Мир иллюзий»",rate:4.2,area:"Старый город",lat:52.2495279,lng:21.0118534,
+  img:IMG+"AJRVUZOIP1CN4CyDhfZK5rp4kLeVGNFYxI5H9tHb4ReMffUNQMyYmFZkdWaUDCKY3Qpg11b9MA7sOF8K4XJ2fhNoas-vcdUAOcF8MdC76Dim7_eGfYnG1NhVmAolq0LNQvG9I31tQqFDxcVtNTYsbA=w800-h600",
+  badges:["~1 ч","Фото"],desc:"60+ оптических иллюзий, всё можно трогать.",pick:"<b>Берите:</b> камеру; тоннель Vortex.",
+  long:"Более 60 иллюзий и инсталляций, которые можно и нужно трогать: комната Эймса, наклонная комната, зеркальный лабиринт, тоннель Vortex. Гида нет — идёте в своём темпе. В отзывах хвалят дружелюбный персонал и фотогеничность. Минусы: небольшая площадь и лестницы без лифта. На выходе — сувенирный магазин.",
+  url:"https://maps.app.goo.gl/X9V9b4wTktKVq2w3A"},
+ {cat:"museum",name:"melt museum",rate:4.5,area:"Центр",lat:52.2347408,lng:21.0145491,
+  img:IMG+"AJRVUZPWY5bp6mE-0bfY_GBFMPO5ccq78320zPlzkK6tXglsI96CZhHc0pI1x1ryVySmnYlIctuucoKI-KnjzFB7hGVKp1mUMChGMKtuM8rtQeV6B2QQepS5HvVjOhj0fuEltzUG9wKrei6vPx3s0eM=w800-h600",
+  badges:["Бронь онлайн","Пн — выходной"],desc:"Иммерсивное AI-искусство, аналог teamLab.",pick:"<b>Учтите:</b> стробоскопы и громкий звук.",
+  long:"Первый в Польше музей иммерсивного искусства (~600 м²): 14 мультисенсорных залов на тему отношений человека и ИИ. Технологичный опыт «для эмоций», нравится и детям, и взрослым; партнёр проекта — NVIDIA. Билеты лучше брать онлайн — мест ограниченное число. Важно: мигающий свет и громкий звук — с осторожностью при эпилепсии.",
+  url:"https://maps.app.goo.gl/WMqr5Hz7a9mJsHqz9"},
+ {cat:"museum",name:"Центр науки «Коперник»",rate:4.6,area:"Повислье",lat:52.2418552,lng:21.0287271,
+  img:IMG+"AJRVUZPrHFlZBQ_p37YeZ928UXeWUWGzVvJip2IaO9JKXanydipBuPQDS51nkX27PqHF6Ub1HlGO5mY0X15m8SB6XfJME-tP0xbmOncET1SxWr9AOW6UODrh4tLlLjnWH2R8-SUC1nZE0n6eWsGs=w800-h600",
+  badges:["Билеты заранее","Полдня"],desc:"450+ интерактивных экспонатов + планетарий.",pick:"<b>Совет:</b> по выходным толпы — слот заранее.",
+  long:"Один из самых популярных объектов города: 450+ интерактивных экспонатов, которые можно трогать, планетарий «Niebo Kopernika» и сезонный сад на крыше. Легко занять полдня — интересно и детям, и взрослым. Главный минус — толпы по выходным и в каникулы: берите билеты онлайн заранее, слоты быстро распродаются.",
+  url:"https://maps.app.goo.gl/fvYCXrt2c9nydMou7"},
+ {cat:"museum",name:"Центр денег НБП",rate:4.7,area:"Центр",lat:52.2361634,lng:21.014519,
+  img:IMG+"AJRVUZM2EeYVtI19VNH6EpVy5P5ywf_FiRPar0YaTNAByNvHI00dUUFgpIpj6OKp1LYbUv1IGEK-BSgdK0sBpvwvtB7lF82vlRz8EWWxGJnUhOcKqJwpdLqLNaIDzxWDxN_SLpIwwNyNZKulcVIHw9s=w800-h600",
+  badges:["Бесплатно","Пн — закрыто"],desc:"Музей денег: можно подержать слиток золота.",pick:"<b>Совет:</b> в вс вход свободный, но людно.",
+  long:"Современный интерактивный музей об истории денег — от обмена товарами до криптовалют, с банковским хранилищем и слитком золота, который можно поднять. Вход бесплатный, сделано технологично и спокойно, без толп. Заложите ~1,5 часа. По понедельникам закрыт.",
+  url:"https://maps.app.goo.gl/7eaYuMBrzBQzYRyR8"},
+ {cat:"museum",name:"Музей современного искусства (MSN)",rate:3.7,area:"Центр",lat:52.2331445,lng:21.0092567,
+  img:IMG+"AJRVUZPyuPnqUcDFrj81GPspcTVwwB-GazKU15NM9CeydYPGmjbWP_eHBSSSRs74UCogXzMPMuDL89il4DjOr_8TDliIe2cg3LsEhpZW7YsYb7QqhIR_IkPp2Swl18uYYSFBB5m1FIjuLulPq9jUpJH6DamRYQ=w800-h600",
+  badges:["Здание 2024","Пн — закрыто"],desc:"Белое минималистичное здание-достопримечательность.",pick:"<b>Учтите:</b> выставки ротируются.",
+  long:"Новое белое минималистичное здание (архитектор Thomas Phifer), открылось в конце 2024 и само стало достопримечательностью. В отзывах о здании говорят больше, чем об экспозиции: светлые пространства и эффектные лестницы. Коллекция камерная, выставки часто меняются — проверяйте программу. Понедельник — выходной.",
+  url:"https://maps.app.goo.gl/F4tP5aVsMBDMvLva6"},
+ {cat:"museum",name:"Галерея «Cliché»",rate:4.6,area:"Новый город",lat:52.2528595,lng:21.0073014,
+  img:IMG+"AJRVUZNl1VTv0tmbMjiH2a925X8MTp3yYlpk8UppirMwMH_Bv7hbKv1HRAzLiCYtQj2hBhUzwVdsMi1VP6ACbIPxbStSPfnOogwGtkK435_GTAv-LQ0DEk5s2wa4LBlPlB_s-xs9ukQ7_tytqgDULg=w800-h600",
+  badges:["Вт–сб","Бесплатно"],desc:"Камерная галерея молодого искусства.",pick:"<b>Совет:</b> проверяйте выставку в Instagram.",
+  long:"Камерная галерея современного искусства на Новом городе: ставка на молодых художников и кураторские проекты, участие в Warszawskie Targi Sztuki. Вход свободный, экспозиции часто меняются. Для тех, кто любит живую молодую сцену, а не классику. Перед визитом сверяйтесь с актуальной выставкой в их Instagram.",
+  url:"https://maps.app.goo.gl/var5eZhUgN4et8eV7"},
+ {cat:"museum",name:"Вилла Гавроньских",rate:4.6,area:"Уяздув",lat:52.2234072,lng:21.0237681,
+  img:IMG+"AJRVUZM9HQZoZFTpW4KDcELElhlpjjhUo4sg6uNEQFgUr-GUyzLIzIXtoLgD-NhlNhYZNVxB2UfvWO6CwSayNMoaTl9diw5i6LCBK2-i1pjzXoG25enaOQlskPYsZeIDl31sjsS-IG1MDgyeaUgrW2V223nUiQ=w800-h600",
+  badges:["Только во время выставок"],desc:"Вилла-палаццо, частный музей дизайна.",pick:"<b>Важно:</b> вне выставок закрыта.",
+  long:"Столетняя неоренессансная вилла-палаццо (бывшие посольства), с января 2026 — памятник архитектуры; сейчас частный музей искусства и дизайна фонда Visteria. Работает выставками-событиями, а не постоянной экспозицией (в 2025–2026 — Romantyczny Brutalizm, NADA Villa, Craft Days). Вход часто бесплатный, но по регистрации. Вне выставок вилла закрыта — проверяйте афишу.",
+  url:"https://maps.app.goo.gl/hKUYxbENDPReXAbg8"},
+ {cat:"park",name:"Старый город и Королевский замок",rate:4.7,area:"Старый город",lat:52.2477436,lng:21.0141275,
+  img:IMG+"AJRVUZN35XI-9POfEbp47QpoU1OtOkFgMvmCtGhq4RVT0km9GQMporlNY19yS6xYAwpZTlw1IyaosXccuTnAvJes6136pu8blyaqf93SLsRixFkOtLlqLJGmSfebb7mydwo1xRbMLTrqIsgBEzpipSA=w800-h600",
+  badges:["ЮНЕСКО","Замок: пн — закрыт"],desc:"Сердце города: Старе Място и Королевский замок.",pick:"<b>Совет:</b> по средам вход в замок бесплатный.",
+  long:"Сердце Варшавы — отстроенный после войны Старый город (ЮНЕСКО) и Королевский замок с роскошными Королевскими апартаментами, тронным залом и залами Каналетто. В отзывах советуют аудиогид (включается по залам автоматически) и отмечают удобный гардероб с локерами. По средам вход в замок бесплатный, но многолюднее. Замок закрыт по понедельникам; сам Старый город и Замковая площадь — в любое время.",
+  url:"https://maps.app.goo.gl/Zamek"},
+ {cat:"park",name:"Королевские Лазенки",rate:4.8,area:"Уяздув",lat:52.2146733,lng:21.0328941,
+  img:IMG+"AJRVUZP67WS5Zq8jZW0Y5uNxmWx8uzb9JhU6x1F7B6wV2ytLGN0U1mWg0eyXkWOR5MgK3XRuUi3B9kZsc4QYrrL4xo_yNxgFr7dZiyDiBZnEizrfRRG5bTlwXCE5CyF2o4y_WTh9hNbcYRkE--MfEA=w800-h600",
+  badges:["Бесплатно","2–3 часа"],desc:"Главный парк: павлины, Дворец на острове.",pick:"<b>Совет:</b> рядом десерт в Soulmates.",
+  long:"Главный парк-дворцовый комплекс города (76 га): Дворец на острове, павлины и белки, памятник Шопену с бесплатными концертами летом по воскресеньям. Вход в парк бесплатный, во дворцы — по билетам. Любимое место и туристов, и местных; красиво в любой сезон. Заложите 2–3 часа и совместите с десертом в Soulmates рядом.",
+  url:"https://maps.app.goo.gl/MLaEMXJmLdyvoNxL7"},
+ {cat:"park",name:"Дворец в Вилянуве",rate:4.7,area:"Вилянув",lat:52.1651749,lng:21.0905084,
+  img:IMG+"AJRVUZMtxE8q7G0GiJ8EAil-J6o7XaV3ij60X5rrg8SVmL3C8zy_HREi4w0d4pt5eTp7aTnn5u4_Oo7rTRIeBZH_9DCCUlyEFnGv5801A1l69prDW2SsZmeCxxhblCMR6ag9W_Sp7amGS9bIjQOoeA=w800-h600",
+  badges:["~30 мин","Платно"],desc:"Барочный «польский Версаль» с садами.",pick:"<b>Совет:</b> зимой — световое шоу.",
+  long:"Барочный дворец, «польский Версаль», с садами в разных стилях; зимой — световое шоу «Królewski Ogród Światła». Очень живописно, особенно сады. Минусы: далеко от центра (~30 мин), дворец и сад оплачиваются отдельно, по выходным многолюдно. Летом на пруду можно взять каяк.",
+  url:"https://maps.app.goo.gl/whhRE631C4n3S58X8"},
+ {cat:"park",name:"Сад на крыше BUW",rate:4.8,area:"Повислье",lat:52.2431266,lng:21.0249825,
+  img:IMG+"AJRVUZN9MRGLRwC4Xfs_7wKvPhFwjQTQLxmGGvrzn5wYhS3K7EEOTU5FvWl99nrb5dU4Fz-F6RQMQkpwajX1CJG5jL4PjRRli1C6rbvAxpu3oCm9LgESHpZe6grE6SyXolcdzM720GRdOzpDIdXYKw=w800-h600",
+  badges:["Бесплатно","Сезонно"],desc:"Один из крупнейших садов на крыше в Европе.",pick:"<b>Учтите:</b> верхний ярус апр–окт.",
+  long:"Сад на крыше Библиотеки Варшавского университета — один из крупнейших и красивейших в Европе: верхняя и нижняя части, ручьи, мостики и виды на Вислу и центр. Вход бесплатный. Идеально для фото и спокойной прогулки на закате. Сезонный: верхний ярус открыт ≈апрель–октябрь, закрыт по пятницам-субботам и в дождь.",
+  url:"https://maps.app.goo.gl/wc4GHTvNSiqBrqgX7"},
+ {cat:"park",name:"Highline Warsaw",rate:4.5,area:"Центр",lat:52.2286861,lng:21.00028,
+  img:IMG+"AJRVUZPHwJ3rqEAEW6UF0EhHPi3FeSaHsCHJ8qZORkgULwT6TN5-BSoT0tHK49yC3Zwvsw7a1SD2xwF9FY7SdZp7qEE6ComI9paMY430YCdcujSg-cmk770j5SyY5hXbyTN0eEaZbLzeSeJklELEIT1QZfw6zA=w800-h600",
+  badges:["230 м","Бар с садом"],desc:"Самая высокая смотровая в ЕС, панорама 360°.",pick:"<b>Совет:</b> билеты дешевле в будни.",
+  long:"Самая высокая смотровая площадка в ЕС — 53-й этаж башни Varso, ~230 м, панорама 360°. Маршрут: 46-й этаж (история, сувениры, AI-фотобудка) → 49-й (бар-лаунж с садом) → 53-й (площадка). Скоростные панорамные лифты и виды впечатляют, на 49-м можно посидеть с коктейлем. Минусы: дорого, часть бывает занята приватными ивентами; билеты дешевле в будни и онлайн.",
+  url:"https://maps.app.goo.gl/SL3GY5ERZMfexpoW7"},
+ {cat:"park",name:"Пешеходный мост через Вислу",rate:4.5,area:"Висла",lat:52.2464362,lng:21.0257731,
+  img:IMG+"AJRVUZOjS-HDieAR2mOymZigytLM55YQi9qCZHneisa9T0WTzNt9ZSH1FqnIc2CT84YSz5OrUF7-bqJC2Yo8gCK2AukBu8gX2zPndT_5yZlRKWn8B4PyAv4RMTRHQs5IgscxUc2UWJb4_JdtycWnoAk1DpoITg=w800-h600",
+  badges:["452 м","Бесплатно"],desc:"Новый мост в Прагу, виды на Старый город.",pick:"<b>Совет:</b> лучшие закаты и ночные фото.",
+  long:"Новый пешеходно-велосипедный мост через Вислу (открыт в 2024), ~452 м — один из самых длинных пешеходных мостов в Европе. Соединяет центр с Прагой (зоопарк, рестораны), есть лавочки и отличные виды на Старый город. Бесплатно, особенно красиво вечером с подсветкой — лучшая точка для закатных и ночных кадров.",
+  url:"https://maps.app.goo.gl/nYNYdHMdWuAggyZj9"},
+ {cat:"park",name:"Фотобудка / Plac Zbawiciela",rate:0,area:"Центр-юг",lat:52.2200027,lng:21.0176897,
+  img:IMG+"AJRVUZMqsN_dxglBJUiEraiQ4frwvZBLyCO1vxY1JX0leLbFWisYIB73cf_D-wgBGGRbe0VA7y0MBjh-rVxKBFBfpMyHyuMMqtEhbKugoBNPj6fIme8m5vXqN-ndg_NZdzSDJPMCN5Oip6QQw4nMgA=w800-h600",
+  badges:["Аналоговое фото","Кафе вокруг"],desc:"Атмосферная площадь + классическая фотобудка.",pick:"<b>Берите:</b> моментальные фото на память.",
+  long:"Площадь Спасителя — один из самых атмосферных уголков города: неоренессансный костёл и модные кафе вокруг (Plan B, Charlotte). Здесь же классическая аналоговая фотобудка — моментальные снимки на память. В отзывах: весёлый опыт и хорошие сувениры-фото. Отличная остановка между прогулкой и кофе.",
+  url:"https://maps.app.goo.gl/nYNYdHMdWuAggyZj9"},
+ {cat:"shop",name:"Mysia 3",rate:4.5,area:"Центр",lat:52.2305222,lng:21.0207259,
+  img:IMG+"AJRVUZNOtoRk8_XSx7_S01zjysriTKdMz1ZNF44GA1zs2_L2X5SE9mATUk8yByNf_YQXlUOvGjOnPo8arUS3hY1vIoEKZ2DHiQCiho2MwbydIhcjuvbFfuHDXWXqtBzm9x6ouxmjgNYlHOQToyGt=w800-h600",
+  badges:["Концепт-универмаг","Вс — закрыто"],desc:"Польские бренды, COS, MUJI, дизайн.",pick:"<b>Берите:</b> необычные подарки, нишу-парфюм.",
+  long:"Альтернативный концепт-универмаг в здании бывшей цензуры: несколько этажей с польскими и зарубежными марками, украшениями, натуральной косметикой, мебелью и дизайном, плюс кафе и фотогалерея Leica 6×7 (COS, MUJI, NAP, Calvin Klein concept store). Для тех, кто не любит обычные ТЦ. Что брать: необычные подарки, дизайнерские мелочи, нишевую парфюмерию, очки польских марок. Воскресенье — выходной.",
+  url:"https://maps.app.goo.gl/7zX6YKxrJsH9pkS87"},
+ {cat:"shop",name:"Japonia Centralna",rate:4.8,area:"Воля",lat:52.2272337,lng:20.982413,
+  img:IMG+"AJRVUZPIfeNcEgHhCccWT6pHnYR5mkjFMP993sWdiSmLq4msBk_QlsHZnKsdMRvfX3Z7QfZWAQVnf8Y31YPXJSw1YVza8hfxUUG544Ccs8ABUyi8wyqsJ322BX4mt4NCwkE-_sDFn-Z26TAg9jQJ4zNC2IxRWg=w800-h600",
+  badges:["Японский магазин","Вс — закрыто"],desc:"Товары из Японии: снеки, рис, мисо.",pick:"<b>Берите:</b> рис Koshihikari, мисо, сладости.",
+  long:"Настоящий японский продуктовый — товары везут напрямую из Японии: снеки в стиле аниме/манги (Sanrio, Pokémon), сладости, напитки, специи, instant-блюда, паста мисо (bio). Рай для фанатов японской кухни. Что брать: короткозёрный рис Koshihikari для суши, мисо, сладости. На упаковках есть переводы состава и аллергенов; есть вег/веган. Воскресенье — выходной.",
+  url:"https://maps.app.goo.gl/XZtxkCCXPeXpyobV6"},
+ {cat:"shop",name:"Sakamoto-Ya",rate:4.6,area:"Центр",lat:52.2326065,lng:21.0139322,
+  img:IMG+"AJRVUZNLqc_MZKqa6BQ5QuDsMchw7zt-Sf6KKtvQjPpPKwVZWRvKfjVj677vImDPL0yqaLOGr9QtYLBIH5EPqz5QSPTH45LmJEDSkbSA_5d2Rbj1a0UxjrdqGrF-3vv0rPnISsAkAf9vIRL7PVnrZw=w800-h600",
+  badges:["Магазин + сакэ","Центр"],desc:"Премиальные японские продукты, сакэ, чай.",pick:"<b>Берите:</b> сакэ, udon/soba, онигири.",
+  long:"Маленький магазин премиальных японских продуктов и сакэ + органический чай в центре, всё импортируется из Японии. Хвалят за аутентичность и дружелюбного хозяина, который даёт пробовать напитки. Что брать: сакэ, лапшу (ramen/udon/soba, есть удон с зелёным чаем), мочи, соусы, онигири на вынос. Минус: недёшево, особенно алкоголь. Рядом — отдельная точка стрит-фуда.",
+  url:"https://maps.google.com/?cid=6278687889091254087"},
+ {cat:"shop",name:"UNIQLO",rate:4.4,area:"Центр",lat:52.2331037,lng:21.0102732,
+  img:IMG+"AJRVUZOZc16pWUuVLVcS3nFpYHgn1_WqPJolqB_EwE_xfkDP0HXrmu5LE5h62nZwFfDk_yIyCZn2rOcEggHCWjysbRIa21zpyyrt-Qj8GV1jJRDSOo_o2-QgFkmg6fUQETBPWxDqXk_SwzHxkjOkxw=w800-h600",
+  badges:["Флагман","Вс — закрыто"],desc:"Базовый гардероб, отличное цена/качество.",pick:"<b>Берите:</b> HEATTECH, базовые вещи.",
+  long:"Флагман японской марки на Маршалковской у Дворца культуры — большой магазин базового гардероба с отличным «цена/качество»: термобельё HEATTECH, пуховики, кашемир, аккуратные базовые вещи. Есть зона кастомизации (печать на футболках и сумках). Минусы в отзывах: по выходным очереди в примерочные, сервис местами прохладный. Воскресенье — закрыто.",
+  url:"https://maps.google.com/?cid=442614581743051917"},
+ {cat:"shop",name:"Золотые террасы (Złote Tarasy)",rate:4.4,area:"У вокзала",lat:52.2299538,lng:21.0029753,
+  img:IMG+"AJRVUZPr4QrkXqSIVavG8AmrLCaz-tU05lqcqqEgVa4JzzHcxod9qi_gPlT8S9HTZLoP22cy7mtr4QT7UaiZn0MA8o0bUFbjqwpP7EBU4y6ena_vKCOKe7qu4UIhVBXbgK7GsNbiem-J7Hl2M9rg=w800-h600",
+  badges:["ТЦ","Вс — закрыто"],desc:"Большой ТЦ у вокзала: бренды, фуд-корт, кино.",pick:"<b>Совет:</b> удобно скоротать время в центре.",
+  long:"Крупный ТЦ под волнистой стеклянной крышей прямо у вокзала Warszawa Centralna: десятки брендов, фуд-корт с разными кухнями, кинотеатр. Идеально, чтобы скоротать время в центре или перед поездом, особенно красиво перед Рождеством. Минусы: всегда многолюдно, бывает сложно найти место на фуд-корте, цены чуть выше. Воскресенье — закрыто.",
+  url:"https://maps.google.com/?cid=1328611134103152476"},
+ {cat:"cafe",name:"Soulmates",rate:4.9,area:"Уяздув",lat:52.2261908,lng:21.0329814,
+  img:IMG+"AJRVUZNsvGdPqiVll2n96Mhf-6hPpDU4-UfJGf9bkubK9Eft8LbvMxhJwPEv9_yx8NBrUoA-xFuyz0HqYiUf2hOY-LrlrVpB8INkNmAG6QaYALkXRROPnBEsbnjXlE7CZTSSx1H2oUE0KBub39Zn=w800-h600",
+  badges:["У Лазенок","Пн — выходной"],desc:"Кондитерская с авторской выпечкой, 4.9.",pick:"<b>Берите:</b> макаруны, наполеон, булочку.",
+  long:"Маленькая уютная кондитерская у Лазенок с авторской выпечкой и кофе (рейтинг 4.9); места внутри и снаружи в зелени. Выпечка не только вкусная, но и красивая — видна работа над деталями; персонал внимательный. Что брать: макаруны, наполеон со взбитыми сливками, кардамоновую булочку, мороженое. Понедельник — выходной.",
+  url:"https://maps.app.goo.gl/ayVnjTnZjayzc9uB6"},
+ {cat:"cafe",name:"Manto Cafe",rate:4.5,area:"Мокотув",lat:52.1877986,lng:21.0031802,
+  img:IMG+"AJRVUZOnOMGVV2VAPMzN_D1rDfglfIFHy0e12YRgauTIPoI4dQfunB7X9N7xjBovxWK0l10Y_t0QrAa7lOPXeQFfK4mX6PPVs7hhisSzGQ04Y0hmUsMlIGZfyjO40M3PEPBxjTJuZGSOKtcpWJC1PLbLhjTbPg=w800-h600",
+  badges:["Мокотув","Очереди по выходным"],desc:"Матча + протеиновые напитки на бывшей АЗС.",pick:"<b>Берите:</b> Pumpkin Matcha, Vanilla Protein.",
+  long:"Модная функциональная кофейня на бывшей АЗС в Мокотуве: матча из Японии и авторские напитки с протеином, коллагеном и адаптогенами (lion's mane, чага, спирулина). За концептом — спортсмены из соседнего клуба единоборств; из еды только мочи. Что брать: Creamy Pumpkin Matcha, Matcha Vanilla Protein Power, baby blue matcha с солёной ванилью. Минус: по выходным длинные очереди.",
+  url:"https://maps.app.goo.gl/XPuNXY1hSG1oWUxE6"},
+ {cat:"cafe",name:"Coffeedesk — The Form",rate:4.5,area:"Воля",lat:52.2302896,lng:20.9893995,
+  img:IMG+"AJRVUZPF95x2ufhmD0HYH8Uhx6vCBlCt5LHukMQq6Z7HyF4IM3q750kp0FGQQnq9xqF7t4KF1Lham7ILI8xpB8guN9PCXXO3Ad7AHaUzLdhKWfrRfjIZU6zCVcixbvq73GxApHKrtWwygG_PMsGZn0NHHBLqPw=w800-h600",
+  badges:["Воля","Кофе + магазин"],desc:"Specialty-кофе и большой магазин зерна, керамики.",pick:"<b>Берите:</b> зерно, керамику, подарки.",
+  long:"Самая большая кофейня сети: specialty-кофе (эспрессо, переливы) плюс крупнейшая полка-магазин с зерном, аксессуарами, керамикой польских дизайнеров и подарочными наборами. «Диснейленд для кофейных гиков» — много методов заваривания, знающий персонал, светлый интерьер и терраса. Что брать: specialty-зерно, керамику, подарочные сеты. Минус: иногда непостоянная температура эспрессо-напитков.",
+  url:"https://maps.app.goo.gl/u7YpF1tmxFd3RYFQA"},
+ {cat:"resto",name:"MUND",rate:4.8,area:"Старый город",lat:52.2431961,lng:21.0078701,
+  img:IMG+"AJRVUZNXkdgM2fHKzdTiBitlXXGgQxvQCWsgLkQCujdhA0HPEbJr4aAaYbnHtpmSJJ0RT0N7We3hO2y-7gaAv_SPDj2BNUiu6Dt31anLwpHAO8q0Qr7ucQT5kyc7HZuGGqw5pXVYXgOXKIaMBQ=w800-h600",
+  badges:["Michelin 2026","Бронь"],desc:"Ресторан/пекарня в дизайн-отеле Puro.",pick:"<b>Берите:</b> выпечку и тартар.",
+  long:"Ресторан и пекарня в дизайн-отеле Puro Old Town, включён в гид Michelin Польша 2026 (в подборке ресторанов при отелях). Атмосферное место с акцентом на качество; в отзывах отдельно хвалят хлеб, выпечку и сервис. Подходит для спокойного ужина или завтрака. Бронируйте столик заранее.",
+  url:"https://maps.app.goo.gl/cDcq7b2uGzvVAvsHA"},
+ {cat:"resto",name:"Mimosa Brooklyn Pizza",rate:4.8,area:"Центр",lat:52.2321276,lng:21.0132399,
+  img:IMG+"AJRVUZNjP5xxmYP0kKEo9auTSyU0D78DSH1Ctoj430cVw4IFxJP3hJZDapvfQWruP6GAwFbI-MxNBv5bTEGwhtjy7fE62MYw-nIeeoUxie0nThaTQ5juHqM8sLenbSx3aGeFLnjdYMI2a9LqhmNynFUs8NtE9w=w800-h600",
+  badges:["Хмельна","Стильно"],desc:"Бруклинская пицца из дровяной печи, 4.8.",pick:"<b>Берите:</b> груша/мёд, парма с вишней, медовик.",
+  long:"Филиал киевской Mimosa: бруклинская пицца из дровяной печи (на подносах, с тремя соусами для корочки — трюфельный айоли, ancho-крем, острый мёд), плюс паста, основные блюда и коктейли. Хвалят тесто с пузырчатыми краями, креативные топпинги и сервис; интерьер стильный. Что брать: пиццу груша/сыр/мёд и парму с вишней в порто, медовый торт. Минус: паста средняя на фоне пиццы.",
+  url:"https://maps.app.goo.gl/oscsLQ5gZ3Ri9Qsh6"},
+ {cat:"resto",name:"NOOK",rate:4.7,area:"Воля",lat:52.2376932,lng:20.9948016,
+  img:IMG+"AJRVUZP7EKmAp3EJNcfrfoxTRWl_gy-GqS3z9VUAQgHFXhfkr9upsUjMt7jbQP6ZXu3kKsiADdtJdOwQSXVB0AE0OOr3b_Y73hKWoRjFR6nigYBVmOkCnH_A3XCbS1SwQYxw7QwaeZXX2B2Egft_005xGqEHsw=w800-h600",
+  badges:["Воля","Бронь в выходные"],desc:"Японское food-sharing: рамен, суши, katsu sando.",pick:"<b>Берите:</b> рамен, сашими, katsu sando.",
+  long:"Японское food-sharing бистро у Browary Warszawskie: блюда для компании на основе рыбы и морепродуктов, рамен, суши/нигири, katsu sando и модные напитки на матче. Готовят вкусно, сервис тёплый и быстрый, фан-база растёт. Что брать: рамен, тунец татаки/сашими, нигири, матча с персиком. Минусы: столик дают на ~1,5–2 часа, в выходные нужна бронь, для групп 4+ — сервисный сбор.",
+  url:"https://maps.app.goo.gl/d155QjARYqyESrdF7"},
+ {cat:"resto",name:"Ресторан «Limone»",rate:4.3,area:"Центр",lat:52.24353,lng:21.0079392,
+  img:IMG+"AJRVUZNGtsrrKg73tdltaFKpes478GbZWgF3t4ZgtbS5RGiGyn_tC0m9HFQAfu4MH6l0O462mE4JkDM1Echcc69u8NlwP-u_3GdA06FuBCWVaFSRXIVx_sfHF8-s_3CH_6yOryTuoRz1MyK6TsoDi4rxTf9qvw=w800-h600",
+  badges:["У Театра","Пн — закрыто"],desc:"Итальянская с красивым интерьером.",pick:"<b>Берите:</b> карпаччо с трюфелем, баклажан.",
+  long:"Новая итальянская у Театральной площади (открылась в конце 2025) в исторической камянице; шеф Yurii Kovryzhenko, концепция «искусство готовки» и камерный интерьер с лимонными деревьями. Атмосфера «как в Италии», упор на качество продуктов и простоту. Что брать: домашний хлеб с маслом из вяленых томатов, карпаччо с трюфелем, баклажан, фирменную Zuppa d'Agnello. Понедельник — закрыто.",
+  url:"https://maps.app.goo.gl/5nNSx75LQcR3TVoi7"},
+ {cat:"resto",name:"Sakamoto-Ya Street Food",rate:4.6,area:"Повислье",lat:52.2376378,lng:21.0260282,
+  img:IMG+"AJRVUZOX5ENrGU28JCS3dgmDYj9SV1IL2Ay36NDdSzJKqkfLBmn1PuWV112380uljjyw3qbS2saTh__pc2szegxfGRWG5hU4mq0ARqCqVqnbEvonat4ZVdIqeB7C0RmrEm3sE8tsTnl_ey6MdTkitQY=w800-h600",
+  badges:["Повислье","Вынос"],desc:"Японский стрит-фуд: онигири, такояки, моти.",pick:"<b>Берите:</b> онигири, такояки, ходзича-латте.",
+  long:"Крошечная точка японского стрит-фуда в Повислье (Tamka 24) от магазина Sakamoto-Ya: онигири (в т.ч. вег/веган), такояки, мисо-суп, моти и модные напитки — матча и ходзича-латте. В отзывах хвалят свежесть, щедрые порции и быструю приветливую подачу, цены адекватные. Что брать: онигири с разными начинками, сырные такояки, ходзича-латте. Минус: мало посадки — берите на вынос.",
+  url:"https://maps.google.com/?cid=14363524757317136969"},
+ {cat:"food",name:"Elektrownia Powiśle",rate:4.7,area:"Повислье",lat:52.24064,lng:21.0275142,
+  img:IMG+"AJRVUZOFiDSJ89DjybaLX7iQsjp1zy962DOrG3bCVVd0LPUQMEFDmbT4uXCEAP2h3_xLWNUXz5k6pqIAl-Fy9-b70AZgeWeq7r_pRUDyFa5j5VDjf86OUsU2HmT9IXoPCDHHYqXXSBNOtnWXB9OQHQ=w800-h600",
+  badges:["Повислье","Винтаж-маркет"],desc:"Фуд-холл и магазины в бывшей электростанции.",pick:"<b>Совет:</b> удобно после Коперника / BUW.",
+  long:"Бывшая электростанция, превращённая в торгово-гастрономическое пространство: фуд-холл и десятки отдельных заведений, магазины, центральное расположение у Повислья; по выходным — винтаж-маркет. Красивая индустриальная архитектура и много вариантов еды в одном месте. Удобно совместить с Центром «Коперник» или садом BUW рядом. Минус: популярно, людно, цены выше средних.",
+  url:"https://maps.app.goo.gl/zzYxH74tnnjq1cCKA"},
+ {cat:"food",name:"Fabryka Norblina",rate:4.7,area:"Воля",lat:52.2324797,lng:20.9910542,
+  img:IMG+"AJRVUZPkRJXOBsrMjzZbsGyQFO_17viyLPe9rDKvblsqaqaGd5Esl0TpuQh7mag754B228J65Kl2ryBaTo9uWjHuTWZWSb4v0d1x6twBZuOh2aXfAKLDu7aDyv71iUz_jSgE6eg98w1AlDNbDp71qQ=w800-h600",
+  badges:["Воля","Food Town"],desc:"Огромный фуд-холл + кино, музей, BioBazar.",pick:"<b>Совет:</b> от корейской до NY-пиццы.",
+  long:"Бывший завод металлоизделий — большой культурно-гастрономический комплекс на Воле: фуд-холл Food Town (десятки кухонь — от корейской и греческой до NY-пиццы), кино, музей, магазины и эко-рынок BioBazar. Один из самых больших и разнообразных фуд-холлов города. Минусы: по вечерам и выходным шумно и людно, легко потеряться в масштабах.",
+  url:"https://maps.app.goo.gl/dNnXCNQyEESARUoWA"},
+ {cat:"food",name:"Browary Warszawskie",rate:4.6,area:"Воля",lat:52.2344901,lng:20.9876713,
+  img:IMG+"AJRVUZOhFSRMpKo7JLVQc-wiEVGT64_n-RaFnQSUB9Vouy-EKxU_K2bmqdVo3I-npZEYPulfakVlBgjyJ2nxevh-wvXi0Sx8EmsChSs-6YdUZ3uIy7qbOkBVLEvBVEr_qIh4ah5pO4QhWJZbiWcx=w800-h600",
+  badges:["Воля","Бары"],desc:"Квартал в бывшей пивоварне: рестораны, бары.",pick:"<b>Берите:</b> трюфельный бургер, пельмени с уткой.",
+  long:"Бывшая пивоварня — современный квартал на Воле с фуд-холлом Warzelnia, ресторанами, барами, офисами и жильём. Приятное пространство с живой атмосферой по вечерам и хорошим выбором еды и напитков. Что брать: трюфельный бургер, пельмени с уткой, локальное пиво и коктейли. Минусы: ценник «центровой», по выходным многолюдно.",
+  url:"https://maps.app.goo.gl/GA5hXEkYv6J6KQ9x9"}
+];
+
+const FEATURED=[7,8,2,11,12,9];
+const state={cat:"all",q:""};
+const saved=new Set();
+
+/* filters */
+const fbar=document.getElementById('filters');
+function chip(key,label,hex){
+  const b=document.createElement('button');b.className='chip'+(key==='all'?' on':'');
+  b.dataset.k=key;b.dataset.hex=hex||'#161616';
+  const n=key==='all'?P.length:P.filter(p=>p.cat===key).length;
+  b.innerHTML=label+` <span class="ct">${n}</span>`;
+  b.onclick=()=>{state.cat=key;syncChips();applyFilters();};
+  fbar.appendChild(b);
+}
+chip('all','Все','#161616');
+Object.entries(CATS).forEach(([k,c])=>chip(k,c.label,c.hex));
+function syncChips(){
+  document.querySelectorAll('.chip').forEach(c=>{
+    const on=c.dataset.k===state.cat;
+    c.classList.toggle('on',on);
+    c.style.background=on?c.dataset.hex:'';
+    c.style.borderColor=on?c.dataset.hex:'';
+  });
+}
+
+/* featured */
+const featEl=document.getElementById('featured');
+FEATURED.forEach(i=>{
+  const p=P[i],c=CATS[p.cat];
+  const b=document.createElement('button');b.className='fcard';
+  b.innerHTML=`<img src="${p.img}" alt="${p.name}" onerror="this.style.opacity=0">
+    <div class="fov"></div><span class="fbadge">Must-see</span>
+    <div class="ftext"><div class="fname">${p.name}</div>
+    <div class="farea">${p.rate?`<span class="st">★</span> ${p.rate.toFixed(1)} · `:''}${p.area}</div></div>`;
+  b.onclick=()=>focusCard(i);
+  featEl.appendChild(b);
+});
+
+/* map */
+const map=L.map('map',{scrollWheelZoom:false}).setView([52.235,21.01],12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  {attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:20}).addTo(map);
+const layer=L.layerGroup().addTo(map);
+const markers=P.map((p,i)=>{
+  const c=CATS[p.cat];
+  const m=L.marker([p.lat,p.lng],{icon:L.divIcon({className:'pin',
+    html:`<span style="--pc:${c.hex}"></span>`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-9]})});
+  const rt=p.rate?`<span class="st">★</span> ${p.rate.toFixed(1)} · `:'';
+  m.bindPopup(`<div class="pop"><img src="${p.img}" alt="" onerror="this.style.display='none'">
+    <div class="pop-b"><div class="pop-name">${p.name}</div>
+    <div class="pop-rate">${rt}${c.label} · ${p.area}</div>
+    <a href="${p.url}" target="_blank" rel="noopener">Маршрут в Google Maps →</a></div></div>`,{maxWidth:230});
+  m.on('click',()=>focusCard(i));
+  return m;
+});
+
+/* cards */
+const grid=document.getElementById('lgrid');
+const cards=P.map((p,i)=>{
+  const c=CATS[p.cat];
+  const rate=p.rate?`<span class="star">★</span><span class="rt">${p.rate.toFixed(1)}</span>`:`<span class="walk">Прогулка</span>`;
+  const el=document.createElement('article');el.className='card';el.dataset.i=i;
+  el.innerHTML=`<div class="ph">
+      <img loading="lazy" src="${p.img}" alt="${p.name}"
+        onerror="this.parentElement.style.background='var(--line)';this.style.display='none'">
+      <button class="heart" aria-label="Сохранить">
+        <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 7 5.5 5 8 5C9.5 5 10.8 5.8 12 7C13.2 5.8 14.5 5 16 5C18.5 5 20.5 7 20.5 9.5C20.5 15.5 12 21 12 21Z"/></svg>
+      </button></div>
+    <div class="body"><div class="name">${p.name}</div>
+      <div class="meta">${rate}<span class="dot">·</span>${c.label}<span class="dot">·</span>${p.area}</div>
+      <div class="desc">${p.desc}</div><div class="pick">${p.pick}</div>
+      <div class="long"><p>${p.long}</p></div>
+      <button class="more">Подробнее <span class="ar">▾</span></button>
+      <div class="badges">${p.badges.map(b=>`<span class="badge">${b}</span>`).join('')}</div>
+      <div class="actions">
+        <button class="btn btn-map">На карте</button>
+        <a class="btn btn-go" href="${p.url}" target="_blank" rel="noopener">Маршрут</a>
+      </div></div>`;
+  el.querySelector('.ph').addEventListener('click',e=>{if(e.target.closest('.heart'))return;gotoMap(i);});
+  el.querySelector('.btn-map').addEventListener('click',()=>gotoMap(i));
+  el.querySelector('.more').addEventListener('click',function(){
+    const open=el.classList.toggle('open');this.childNodes[0].nodeValue=open?'Свернуть ':'Подробнее ';
+  });
+  el.querySelector('.heart').addEventListener('click',function(e){
+    e.stopPropagation();
+    if(saved.has(i)){saved.delete(i);this.classList.remove('on');}else{saved.add(i);this.classList.add('on');}
+    updateSaved(); if(state.cat==='saved')applyFilters();
+  });
+  el.addEventListener('mouseenter',()=>{const mk=markers[i];if(mk._icon)mk._icon.classList.add('active')});
+  el.addEventListener('mouseleave',()=>{const mk=markers[i];if(mk._icon)mk._icon.classList.remove('active')});
+  grid.appendChild(el);return el;
+});
+
+/* filtering */
+const cntEl=document.getElementById('cnt'),emptyEl=document.getElementById('empty');
+
+function applyFilters(){
+  const q=state.q.trim().toLowerCase();
+  layer.clearLayers();const b=[];let n=0;
+  P.forEach((p,i)=>{
+    const inCat = state.cat==='all' ? true : (state.cat==='saved'? saved.has(i) : p.cat===state.cat);
+    const hay=(p.name+' '+p.area+' '+CATS[p.cat].label+' '+p.desc+' '+p.long).toLowerCase();
+    const inQ = !q || hay.includes(q);
+    const show=inCat&&inQ;
+    cards[i].style.display=show?'':'none';
+    if(show){markers[i].addTo(layer);b.push([p.lat,p.lng]);n++;}
+  });
+  if(b.length)map.fitBounds(b,{padding:[44,44],maxZoom:15});
+  const plain=(state.cat==='all'&&!q);
+  featEl.style.display=plain?'':'none'; featLab.style.display=plain?'':'none';
+  cntEl.textContent=n; emptyEl.style.display=n?'none':'block';
+  emptyEl.textContent=(state.cat==='saved'&&!saved.size)?'Пока ничего не сохранено — жмите ♥ на карточках':'Ничего не найдено';
+}
+
+/* search */
+document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value;applyFilters();});
+/* сброс через фильтр 'Все' */
+
+/* saved */
+function updateSaved(){
+  const b=document.getElementById('savedBtn');b.classList.toggle('has',saved.size>0);
+  document.getElementById('savedCnt').textContent=saved.size;}
+document.getElementById('savedBtn').addEventListener('click',()=>{state.cat='saved';syncChips();applyFilters();
+  if(mq()){showMap(false);} window.scrollTo({top:0,behavior:'smooth'});});
+
+/* view toggle */
+const mq=()=>window.matchMedia('(max-width:999px)').matches;
+function showMap(on){
+  document.body.classList.toggle('map-active',on);
+  const fab=document.getElementById('mapfab');
+  fab.innerHTML=on?'<svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2"><path d="M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>'
+    :'<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>';
+  measureHead(); if(on)setTimeout(()=>map.invalidateSize(),90);
+}
+document.getElementById('mapfab').addEventListener('click',()=>showMap(!document.body.classList.contains('map-active')));
+document.querySelectorAll('.dtab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.dtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  state.cat=t.dataset.f;syncChips();applyFilters();showMap(false);window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+function gotoMap(i){
+  if(mq())showMap(true);
+  setTimeout(()=>{map.invalidateSize();map.flyTo([P[i].lat,P[i].lng],16,{duration:.7});markers[i].openPopup();},mq()?260:0);
+}
+function focusCard(i){
+  if(mq())showMap(false);
+  setTimeout(()=>{const el=cards[i];el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2px var(--black)';
+    setTimeout(()=>el.style.boxShadow='',1300);},mq()?90:0);
+}
+
+function measureHead(){document.documentElement.style.setProperty('--head',document.querySelector('header').offsetHeight+'px');}
+window.addEventListener('load',measureHead);window.addEventListener('resize',measureHead);
+map.on('click',()=>map.scrollWheelZoom.enable());
+applyFilters();measureHead();
+</script>
+</body>
+</html>
