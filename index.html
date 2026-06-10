@@ -369,7 +369,7 @@ const P=[
 
 const fbar=document.getElementById('filters');
 const state={cat:"all",q:""};
-const saved=new Set();
+const saved=new Set(JSON.parse(localStorage.getItem('waw_saved')||'[]'));
 
 function chip(key,label,hex){
   const b=document.createElement('button');
@@ -446,6 +446,7 @@ const cards=P.map((p,i)=>{
   el.querySelector('.more').addEventListener('click',function(){
     const open=el.classList.toggle('open');this.childNodes[0].nodeValue=open?'Свернуть ':'Подробнее ';
   });
+  if(saved.has(i))el.querySelector('.heart').classList.add('on');
   el.querySelector('.heart').addEventListener('click',function(e){
     e.stopPropagation();
     if(saved.has(i)){saved.delete(i);this.classList.remove('on');}else{saved.add(i);this.classList.add('on');}
@@ -491,6 +492,7 @@ document.getElementById('searchBtn').addEventListener('click',()=>{
 
 /* saved */
 function updateSaved(){
+  localStorage.setItem('waw_saved', JSON.stringify([...saved]));
   const b=document.getElementById('savedBtn');b.classList.toggle('has',saved.size>0);
   document.getElementById('savedCnt').textContent=saved.size;}
 document.getElementById('savedBtn').addEventListener('click',()=>{
@@ -535,7 +537,7 @@ function focusCard(i){
 function measureHead(){document.documentElement.style.setProperty('--head',document.querySelector('header').offsetHeight+'px');}
 window.addEventListener('load',measureHead);window.addEventListener('resize',measureHead);
 map.on('click',()=>map.scrollWheelZoom.enable());
-applyFilters();measureHead();
+updateSaved();applyFilters();measureHead();
 </script>
 </body>
 </html>
